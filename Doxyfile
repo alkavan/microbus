@@ -1,0 +1,34 @@
+# Doxyfile 1.12.0
+
+PROJECT_NAME           = "microbus"
+
+OUTPUT_DIRECTORY       = doc
+
+INPUT                  = src/microbus.hpp
+RECURSIVE              = NO
+EXCLUDE_PATTERNS       = */test/*
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+HAVE_DOT               = YES
+DOT_MULTI_TARGETS      = YES
+STRIP_FROM_PATH        =
+
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = YES
+GENERATE_MAN           = NO
+GENERATE_XML           = NO
+GENERATE_RTF           = NO
+
+PDF_HYPERLINKS         = YES
+DOCUMENT_CLASS         = "article"
+
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+GRAPHICAL_HIERARCHY    = YES
