@@ -109,6 +109,21 @@ int main() {
     event_loop.stop();
 
     shared_event_bus->clear();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Shared event bus and event loop context example
+    using my_event_handler = microbus::event_bus::event_handler<int>;
+    auto context = microbus::shared_context();
+
+    int on_number_id = context.subscribe("OnNumber", (my_event_handler)[](int number) {
+        auto result = factorial(number);
+        std::cout << "Number " << number << " was passed to event." << std::endl;
+    });
+    context.enqueue_event("OnNumber", 69);
+
+    context.wait_until_finished();
+    context.unsubscribe("OnNumber", on_number_id);
+    context.stop();
 }
 
 static int64_t factorial(int n) {
