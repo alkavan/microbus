@@ -2,6 +2,16 @@
 
 The `microbus` namespace provides a simple yet efficient event-bus and event-loop implementation in C++17.
 This library includes classes to manage subscriptions, event notifications, and asynchronous event processing.
+The bus component can be used in a simple subscribe/trigger scenario, or, in a complex multi-threading scenario.
+
+## Key Features
+
+- **Thread-Safe**: Both `event_bus` and `event_loop` classes use mutexes to ensure thread-safety.
+- **Type Erasure**: Handlers are type-erased, allowing storage of various callable objects in a unified manner.
+- **Asynchronous Processing**: Events can be processed asynchronously using the `event_loop` class.
+- **Automatic Cleanup**: Event handlers are automatically cleaned up when unsubscribed or when the event bus is cleared.
+- **Flexible Subscription Management**: Supports multiple subscribers per event and manages them using unique subscription IDs.
+- **Context Helper Class**: Helps operate the bus and loop pair in common application use-cases.
 
 ## Overview
 
@@ -39,13 +49,29 @@ This class manages the processing of asynchronous events. It runs an internal th
 - **wait_until_finished**: Blocks until all events in the queue are processed.
 - **stop**: Stops the event loop and joins the internal thread.
 
-## Key Features
+### `shared_context`
 
-- **Thread-Safe**: Both `event_bus` and `event_loop` classes use mutexes to ensure thread-safety.
-- **Type Erasure**: Handlers are type-erased, allowing storage of various callable objects in a unified manner.
-- **Asynchronous Processing**: Events can be processed asynchronously using the `event_loop` class.
-- **Automatic Cleanup**: Event handlers are automatically cleaned up when unsubscribed or when the event bus is cleared.
-- **Flexible Subscription Management**: Supports multiple subscribers per event and manages them using unique subscription IDs.
+This class is optional, it helps to operate the bus nad loop pair
+in common development scenarios.
+It allows subscribing and queuing event as well as operating the loop.
+
+```cpp
+#include "microbus.hpp"
+#include <iostream>
+
+using my_event_handler = microbus::event_bus::event_handler<int>;
+auto context = microbus::shared_context();
+
+int on_number_id = context.subscribe("OnNumber", (my_event_handler)[](int number) {
+    auto result = factorial(number);
+    std::cout << "Number " << number << " was passed to event." << std::endl;
+});
+context.enqueue_event("OnNumber", 69);
+
+context.wait_until_finished();
+context.unsubscribe("OnNumber", on_number_id);
+context.stop();
+```
 
 ## Example Usage
 

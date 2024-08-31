@@ -274,6 +274,88 @@ namespace microbus {
             }
         }
     };
+
+    /**
+     * @class shared_context
+     * @brief A context that wraps around an event bus and event loop for managing event-based communication.
+     */
+    class shared_context
+    {
+    private:
+        std::shared_ptr<microbus::event_bus> bus_; ///< Shared pointer to the event bus
+        microbus::event_loop loop_; ///< Event loop instance
+
+        template <typename... Args>
+        using event_handler = std::function<void(Args...)>;
+
+    public:
+        /**
+         * @brief Constructs a shared_context with an optional event bus.
+         *
+         * @param bus Shared pointer to an event bus. If nullptr, a new event bus is created.
+         */
+        explicit shared_context(const std::shared_ptr<microbus::event_bus>& bus = nullptr)
+                : bus_(bus ? bus : std::make_shared<microbus::event_bus>()) {
+        }
+
+        /**
+         * @brief Gets the current event bus.
+         *
+         * @return Shared pointer to the event bus.
+         */
+        [[nodiscard]] std::shared_ptr<microbus::event_bus> get_bus() const {
+            return bus_;
+        }
+
+        /**
+         * @brief Subscribes to an event with a specified handler.
+         *
+         * @tparam Args Types of arguments that the event handler takes.
+         * @param event_name Name of the event to subscribe to.
+         * @param handler Function to handle the event.
+         * @return Subscription ID.
+         */
+        template <typename... Args>
+        int subscribe(const std::string& event_name, event_handler<Args...> handler) {
+            return bus_->subscribe(event_name, handler);
+        }
+
+        /**
+         * @brief Unsubscribes from an event.
+         * @param event_name The name of the event.
+         * @param id The subscription ID.
+         */
+        void unsubscribe(const std::string& event_name, int id) {
+            bus_->unsubscribe(event_name, id);
+        }
+
+        /**
+         * @brief Enqueues an event to be processed by the event loop.
+         *
+         * @tparam Args Types of arguments that the event handler takes.
+         * @param event_name Name of the event.
+         * @param params Parameters to pass to the event handler.
+         */
+        template <typename... Args>
+        void enqueue_event(const std::string& event_name, Args&&... params)
+        {
+            loop_.enqueue_event(bus_, event_name, std::forward<Args>(params)...);
+        }
+
+        /**
+         * @brief Waits until the event loop has finished processing all events.
+         */
+        void wait_until_finished() {
+            loop_.wait_until_finished();
+        }
+
+        /**
+         * @brief Stops the internal event loop.
+         */
+        void stop() {
+            loop_.stop();
+        }
+    };
 }
 
 #endif //MICROBUS_MICROBUS_HPP
