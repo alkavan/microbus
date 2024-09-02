@@ -55,25 +55,29 @@ This class is optional, it helps to operate the bus nad loop pair
 in common development scenarios.
 It allows subscribing and queuing event as well as operating the loop.
 
+## Shared Context Example
 ```cpp
-#include "microbus.hpp"
 #include <iostream>
+#include "microbus.hpp"
 
 using my_event_handler = microbus::event_bus::event_handler<int>;
+
 auto context = microbus::shared_context();
 
+// You can also use the event handler inline (and create macros).
 int on_number_id = context.subscribe("OnNumber", (my_event_handler)[](int number) {
     auto result = factorial(number);
     std::cout << "Number " << number << " was passed to event." << std::endl;
 });
+
 context.enqueue_event("OnNumber", 69);
 
 context.wait_until_finished();
+
 context.unsubscribe("OnNumber", on_number_id);
-context.stop();
 ```
 
-## Example Usage
+## Simple/Async Usage Example
 
 This example demonstrates subscribing to an event,
 triggering it synchronously and asynchronously,
@@ -88,25 +92,28 @@ int main() {
     auto bus = std::make_shared<microbus::event_bus>();
     microbus::event_loop loop;
 
-    // Subscribe to event
-    int subscription_id = bus->subscribe<int>("test_event", [](int value) {
-        std::cout << "Received event with value: " << value << std::endl;
-    });
+    // Define event handler
+    using my_event_handler = microbus::event_bus::event_handler<int>;
 
-    // Trigger the event synchronously
-    bus->trigger("test_event", 42);
+    // Event handler callback
+    my_event_handler my_event_callback = (my_event_handler)[](int value) {
+        std::cout << "Received event with value: " << value << std::endl;
+    };
+
+    // Subscribe callback to event
+    int subscription_id = bus->subscribe<int>("OnTest", my_event_callback);
 
     // Queue the event for asynchronous processing
-    loop.enqueue_event(bus, "test_event", 100);
+    loop.enqueue_event(bus, "OnTest", 100);
+
+    // Trigger the event synchronously
+    bus->trigger("OnTest", 42);
+
+    // Unsubscribe event (auto when out of scope).
+    bus->unsubscribe("OnTest", subscription_id);
 
     // Wait for all events to be processed
     loop.wait_until_finished();
-
-    // Unsubscribe from the event
-    bus->unsubscribe("test_event", subscription_id);
-
-    // Stop the event loop
-    loop.stop();
 
     return 0;
 }
