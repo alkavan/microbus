@@ -22,6 +22,10 @@
 #ifndef MICROBUS_MICROBUS_HPP
 #define MICROBUS_MICROBUS_HPP
 
+#define MICROBUS_VERSION_MAJOR 1
+#define MICROBUS_VERSION_MINOR 1
+#define MICROBUS_VERSION_PATCH 1
+
 #include <functional>
 #include <mutex>
 #include <shared_mutex>
