@@ -57,7 +57,7 @@ namespace microbus {
      * @tparam Args Argument types.
      */
     template<typename Fn, typename... Args>
-    struct concrete_handler : type_erased_handler {
+    struct concrete_handler final : type_erased_handler {
         /**
          * @brief Constructs a concrete handler.
          * @param fn The function to be handled.
@@ -200,8 +200,8 @@ namespace microbus {
          */
         template <typename... Args>
         void enqueue_event(std::shared_ptr<event_bus> &bus, const std::string& event_name, Args&&... params) {
-            auto tuple_args = std::make_shared<std::tuple<std::decay_t<Args>...>>(std::forward<Args>(params)...);
             {
+                auto tuple_args = std::make_shared<std::tuple<std::decay_t<Args>...>>(std::forward<Args>(params)...);
                 std::unique_lock lock(queue_mutex_);
                 async_event_queue_.emplace([bus, event_name, tuple_args] {
                     bus->trigger_impl(event_name, tuple_args.get());
@@ -238,7 +238,6 @@ namespace microbus {
         std::condition_variable queue_condition_; ///< Condition variable for queue notifications.
         bool stop_flag_; ///< Flag to stop the event loop.
         std::thread event_loop_thread_; ///< Thread running the event loop.
-
         std::mutex wait_mutex_; ///< Mutex for wait operations.
         std::condition_variable wait_condition_; ///< Condition variable for wait notifications.
 
@@ -298,7 +297,7 @@ namespace microbus {
         /**
          * @brief Gets the current event bus.
          *
-         * @return Shared pointer to the event bus.
+         * @return A shared pointer to the event bus.
          */
         [[nodiscard]] std::shared_ptr<microbus::event_bus> get_bus() const {
             return bus_;
@@ -322,7 +321,8 @@ namespace microbus {
          * @param event_name The name of the event.
          * @param id The subscription ID.
          */
-        void unsubscribe(const std::string& event_name, int id) {
+        void unsubscribe(const std::string& event_name, const int id) const
+        {
             bus_->unsubscribe(event_name, id);
         }
 
