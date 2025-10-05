@@ -1,4 +1,25 @@
-#include "microbus.hpp"
+/*
+ *  Copyright (C) 2024, 2025 Igal Alkon and ALKONTEK
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a
+ *  copy of this software and associated documentation files (the "Software"),
+ *  to deal in the Software without restriction, including without limitation
+ *  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ *  and/or sell copies of the Software, and to permit persons to whom the
+ *  Software is furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included
+ *  in all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ *  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ *  DEALINGS IN THE SOFTWARE.
+ */
+#include <microbus.hpp>
 
 #include <iostream>
 #include <thread>
@@ -19,12 +40,13 @@ int main() {
     using message_event_handler = microbus::event_bus::event_handler<std::string>;
 
     // Multiply PI event handler
-    calc_event_handler multiply_by_pi = [](double value, int multiply_by) {
+    calc_event_handler multiply_by_pi = [](const double value, const int multiply_by) {
         std::cout << "Multiplying " << value << " by " << multiply_by << " is " << (value * multiply_by) << std::endl;
     };
     int number_event_subscription_id = events.subscribe<double, int>("OnCalc", multiply_by_pi);
+    std::cout << "Subscribed even identifier: " << number_event_subscription_id << std::endl;
 
-    // Message variable from main scope captured by lambda
+    // Message variable from the main scope captured by lambda
     std::string greeting = "Hello, ";
 
     // Message event handler
@@ -104,7 +126,7 @@ int main() {
         event_loop.enqueue_event(shared_event_bus, "OnFactorial", number);
     }
 
-    // Wait until loop finishes handling all events
+    // Wait until the loop finishes handling all events
     event_loop.wait_until_finished();
     event_loop.stop();
 
@@ -115,10 +137,12 @@ int main() {
     using my_event_handler = microbus::event_bus::event_handler<int>;
     auto context = microbus::shared_context();
 
-    int on_number_id = context.subscribe("OnNumber", (my_event_handler)[](int number) {
-        auto result = factorial(number);
-        std::cout << "Number " << number << " was passed to event." << std::endl;
-    });
+    int on_number_id = context.subscribe(
+        "OnNumber",
+        static_cast<my_event_handler>([](const int number){
+            auto result = factorial(number);
+            std::cout << "Number " << number << " was passed to event." << std::endl;
+        }));
     context.enqueue_event("OnNumber", 69);
 
     context.wait_until_finished();

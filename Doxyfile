@@ -4,7 +4,7 @@ PROJECT_NAME           = "microbus"
 
 OUTPUT_DIRECTORY       = doc
 
-INPUT                  = src/microbus.hpp
+INPUT                  = include/microbus.hpp
 RECURSIVE              = NO
 EXCLUDE_PATTERNS       = */test/*
 EXTRACT_ALL            = YES

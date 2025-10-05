@@ -1,8 +1,20 @@
-# microbus - A simple event-bus and event-loop header-only library
+# microbus
+A simple event-bus and event-loop header-only library.
 
 The `microbus` namespace provides a simple yet efficient event-bus and event-loop implementation in C++17.
 This library includes classes to manage subscriptions, event notifications, and asynchronous event processing.
-The bus component can be used in a simple subscribe/trigger scenario, or, in a complex multi-threading scenario.
+The bus component can be used in a simple subscribe/trigger scenario or in a complex multi-threading scenario.
+
+## Build
+(optional, for packaging)
+
+```
+mkdir build && cd build
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=../local ..
+ninja
+ninja install
+cd ..
+```
 
 ## Key Features
 
